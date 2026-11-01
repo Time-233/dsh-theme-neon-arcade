@@ -241,7 +241,9 @@ export function paintAirBattle(ctx, battle, dark = true) {
 }
 
 /** Own all DOM/animation resources; disabled mode has no observers or timers. */
-export function createAirBattleBackground({doc, win}) {
+export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paintAirBattle, mode='air',
+  passiveHint='自动巡航', playingHint='按住拖动战机 · Esc 退出',
+  ariaLabel='像素空战操作区，按住鼠标拖动战机，按 Esc 退出参与', configureScene}) {
   const selector = '[data-conversation-region="chat"]';
   const scenes = new Map();
   let enabled = false, disposed = false, observer, resizeObserver, frameId = null, lastFrame = null;
@@ -255,10 +257,11 @@ export function createAirBattleBackground({doc, win}) {
     if (enabled && !disposed && visible() && [...scenes.values()].some(s => s.width > 0 && s.height > 0) && frameId === null)
       frameId = win.requestAnimationFrame(tick);
   };
-  function endDrag(scene) {
+  function endDrag(scene, release=false) {
     const pointerId = scene.pointerId;
     scene.pointerId = null;
     if (pointerId !== null) {
+      scene.battle.endDrag?.(release);
       try { if (scene.canvas.hasPointerCapture?.(pointerId)) scene.canvas.releasePointerCapture(pointerId); } catch {}
     }
     scene.canvas.style.cursor = scene.playing ? 'grab' : '';
@@ -276,7 +279,7 @@ export function createAirBattleBackground({doc, win}) {
     scene.host.toggleAttribute('data-na-playing', playing);
     scene.button.textContent = playing ? '退出参与' : '参与游戏';
     scene.button.setAttribute('aria-pressed', String(playing));
-    scene.hint.textContent = playing ? '按住拖动战机 · Esc 退出' : '自动巡航';
+    scene.hint.textContent = playing ? playingHint : passiveHint;
     scene.canvas.setAttribute('aria-hidden', String(!playing));
     scene.canvas.tabIndex = playing ? 0 : -1;
     if (playing) {
@@ -293,12 +296,13 @@ export function createAirBattleBackground({doc, win}) {
       element.addEventListener(name, listener);
       scene.cleanups.push(() => element.removeEventListener(name, listener));
     };
-    const move = event => {
+    const point = event => {
       const rect = scene.canvas.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) scene.battle.movePlayer(
+      if (rect.width > 0 && rect.height > 0 && Number.isFinite(event.clientX+event.clientY)) return [
         (event.clientX - rect.left) * scene.battle.width / rect.width,
-        (event.clientY - rect.top) * scene.battle.height / rect.height);
+        (event.clientY - rect.top) * scene.battle.height / rect.height];
     };
+    const move = event => {const p=point(event);if(p)scene.battle.movePlayer(...p);};
     const escape = event => {
       if (!scene.playing || event.key !== 'Escape') return;
       event.preventDefault(); event.stopPropagation();
@@ -310,6 +314,8 @@ export function createAirBattleBackground({doc, win}) {
     listen(scene.canvas, 'keydown', escape);
     listen(scene.canvas, 'pointerdown', event => {
       if (!scene.playing || event.button !== 0 || event.isPrimary === false || scene.pointerId !== null) return;
+      const p=point(event);
+      if (!p || (scene.battle.beginDrag && !scene.battle.beginDrag(...p))) return;
       event.preventDefault(); event.stopPropagation();
       scene.pointerId = event.pointerId;
       scene.canvas.focus({preventScroll: true});
@@ -323,14 +329,18 @@ export function createAirBattleBackground({doc, win}) {
       event.preventDefault(); event.stopPropagation(); move(event);
     });
     for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) listen(scene.canvas, name, event => {
-      if (scene.pointerId === event.pointerId) endDrag(scene);
+      if (scene.pointerId !== event.pointerId) return;
+      if (name==='pointerup') move(event);
+      endDrag(scene,name==='pointerup');
     });
     listen(scene.canvas, 'blur', event => {
       if (scene.playing && !scene.controls.contains(event.relatedTarget)) setParticipation(scene, false, false);
     });
+    configureScene?.(scene, listen, escape);
   }
   function destroyScene(scene) {
-    setParticipation(scene, false, false); endDrag(scene);
+    const ownsFocus=doc.activeElement===scene.canvas || scene.controls.contains(doc.activeElement);
+    setParticipation(scene, false, ownsFocus); endDrag(scene);
     for (const cleanup of scene.cleanups) cleanup();
     scene.host.removeAttribute('data-na-playing');
     scene.controls.remove(); scene.canvas.remove();
@@ -338,13 +348,14 @@ export function createAirBattleBackground({doc, win}) {
   function resizeScene(scene) {
     const rect = scene.host.getBoundingClientRect();
     scene.width = rect.width; scene.height = rect.height;
+    scene.hint.style.display = mode==='pigs' && rect.width<620 ? 'none' : '';
     if (rect.width <= 0 || rect.height <= 0) return;
     const ratio = Math.min(1, 1440 / rect.width, 1080 / rect.height);
     const width = Math.max(1, Math.round(rect.width * ratio)), height = Math.max(1, Math.round(rect.height * ratio));
     if (scene.canvas.width !== width || scene.canvas.height !== height) {
       scene.canvas.width = width; scene.canvas.height = height;
       scene.battle.resize(720 * rect.width / rect.height, 720);
-      paintAirBattle(scene.ctx, scene.battle, doc.body?.hasAttribute?.('data-ds-dark-theme') === true);
+      paint(scene.ctx, scene.battle, doc.body?.hasAttribute?.('data-ds-dark-theme') === true);
     }
   }
   function sync() {
@@ -356,19 +367,20 @@ export function createAirBattleBackground({doc, win}) {
     for (const host of current) {
       if (scenes.has(host)) continue;
       const canvas = doc.createElement('canvas');
-      canvas.className = 'na-air-battle';
+      canvas.className = 'na-air-battle'+(mode==='pigs'?' na-pig-sling':'');
+      canvas.setAttribute('data-na-game',mode);
       canvas.setAttribute('aria-hidden', 'true');
-      canvas.setAttribute('aria-label', '像素空战操作区，按住鼠标拖动战机，按 Esc 退出参与');
+      canvas.setAttribute('aria-label', ariaLabel);
       canvas.tabIndex = -1;
       const ctx = canvas.getContext('2d', {alpha: false});
       if (!ctx) continue;
-      const controls = doc.createElement('div'); controls.className = 'na-air-battle-controls';
-      const hint = doc.createElement('span'); hint.className = 'na-air-battle-hint'; hint.textContent = '自动巡航';
+      const controls = doc.createElement('div'); controls.className = 'na-air-battle-controls'+(mode==='pigs'?' na-pig-sling-controls':'');
+      const hint = doc.createElement('span'); hint.className = 'na-air-battle-hint'; hint.textContent = passiveHint;
       const button = doc.createElement('button'); button.className = 'na-air-battle-join';
       button.type = 'button'; button.textContent = '参与游戏'; button.setAttribute('aria-pressed', 'false');
       controls.appendChild(hint); controls.appendChild(button);
       const scene = {host, canvas, ctx, controls, hint, button, playing: false, pointerId: null, previousFocus: null,
-        cleanups: [], battle: new AirBattle({seed: 82171 + serial++ * 997}), width: 0, height: 0};
+        cleanups: [], battle: new Game({seed: 82171 + serial++ * 997}), width: 0, height: 0};
       scenes.set(host, scene); host.appendChild(canvas); host.appendChild(controls);
       bindControls(scene); resizeScene(scene);
       resizeObserver?.observe(host);
@@ -384,7 +396,7 @@ export function createAirBattleBackground({doc, win}) {
     const dark = doc.body?.hasAttribute?.('data-ds-dark-theme') === true;
     for (const scene of scenes.values()) {
       if (scene.width <= 0 || scene.height <= 0) continue;
-      scene.battle.advance(dt); paintAirBattle(scene.ctx, scene.battle, dark);
+      scene.battle.advance(dt); paint(scene.ctx, scene.battle, dark);
     }
     requestFrame();
   }

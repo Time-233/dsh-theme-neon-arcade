@@ -8,16 +8,18 @@ window.__ModuleLoader__.load({
     const CSS = __THEME_CSS__;
     const TOKENS = __THEME_TOKENS__;
     __AIR_BATTLE_RUNTIME__
+    __PIG_SLING_RUNTIME__
     const ID = 'dsh-theme-neon-arcade';
     const KEY = `${ID}:v1`;
     const ATTRS = ['data-neon-arcade', 'data-neon-arcade-glow', 'data-neon-arcade-grid', 'data-neon-arcade-scanlines', 'data-neon-arcade-decorations', 'data-neon-arcade-game'];
-    const DEFAULTS = Object.freeze({enabled: true, glow: true, grid: true, scanlines: false, decorations: true, game: false});
+    const DEFAULTS = Object.freeze({enabled: true, glow: true, grid: true, scanlines: false, decorations: true, game: false, gameKind: 'air', pigNight: true});
     const inject = ['theme', 'slots', 'shortcuts'];
 
     function loadPreferences() {
       try {
         const value = JSON.parse(localStorage.getItem(KEY));
-        return Object.fromEntries(Object.entries(DEFAULTS).map(([k,v]) => [k, typeof value?.[k] === 'boolean' ? value[k] : v]));
+        return Object.fromEntries(Object.entries(DEFAULTS).map(([k,v]) => [k, k==='gameKind'
+          ? (['air','pigs'].includes(value?.[k])?value[k]:v) : (typeof value?.[k] === 'boolean' ? value[k] : v)]));
       } catch { return {...DEFAULTS}; }
     }
 
@@ -41,6 +43,7 @@ window.__ModuleLoader__.load({
       let active = false;
       let disposed = false;
       let airBattle;
+      let runtimeKind;
 
       const renderPreferences = () => {
         if (disposed) return;
@@ -52,6 +55,13 @@ window.__ModuleLoader__.load({
         for (const [i, key] of ['enabled', 'glow', 'grid', 'scanlines', 'decorations', 'game'].entries()) {
           root.toggleAttribute(ATTRS[i], preferences.enabled && preferences[key]);
         }
+        if (runtimeKind!==preferences.gameKind) {
+          airBattle?.dispose();
+          runtimeKind=preferences.gameKind;
+          airBattle=runtimeKind==='pigs'?createPigSlingBackground({doc:document,win:window,night:preferences.pigNight,
+            onNightChange:night=>update({pigNight:night})}):createAirBattleBackground({doc:document,win:window});
+        }
+        if (runtimeKind==='pigs') airBattle?.setNight(preferences.pigNight);
         airBattle?.setEnabled(preferences.enabled && preferences.game);
       };
       const update = patch => {
@@ -74,12 +84,19 @@ window.__ModuleLoader__.load({
             h('div', {className: 'na-desc'}, '霓虹像素电玩 · 桌面主题'))),
           h('div', {className: 'na-settings-sub'},
             toggle('enabled', '启用霓虹像素主题', false, prefs),
-            toggle('game', '像素空战背景（自动交火）', !prefs.enabled, prefs),
+            toggle('game', '启用小游戏背景', !prefs.enabled, prefs),
+            h('div',{className:'na-setting',key:'gameKind'},
+              h('label',{htmlFor:'na-game-kind'},'游戏选择'),
+              h('select',{id:'na-game-kind',className:'na-game-select','aria-label':'游戏选择',value:prefs.gameKind,disabled:!prefs.enabled,
+                onChange:event=>{if(['air','pigs'].includes(event.target.value))update({gameKind:event.target.value});}},
+                h('option',{value:'air'},'像素空战'),h('option',{value:'pigs'},'愤怒的小猪'))),
             toggle('glow', '霓虹辉光', !prefs.enabled, prefs),
             toggle('grid', '像素网格', !prefs.enabled, prefs),
             toggle('scanlines', 'CRT 扫描线', !prefs.enabled, prefs),
             toggle('decorations', '像素街机点缀', !prefs.enabled, prefs)),
-          h('div', {className: 'na-setting-note'}, '开启空战后，点击画布右上角「参与游戏」，按住鼠标拖动战机；点击「退出参与」或按 Esc 恢复聊天。中弹无限复活。'));
+          h('div', {className: 'na-setting-note'}, prefs.gameKind==='pigs'
+            ? '默认霓虹夜晚，画布右上角可切换白天 / 夜晚并记住选择。点击「参与游戏」，拖住底部小猪拉弓，松开发射；小猪无限供应。点击「退出参与」或按 Esc 恢复聊天。'
+            : '点击「参与游戏」，按住鼠标拖动战机，自动射击、中弹无限复活。点击「退出参与」或按 Esc 恢复聊天。'));
       }
       function Footer({wide}) {
         const prefs = usePreferences();
@@ -100,7 +117,6 @@ window.__ModuleLoader__.load({
         tag.dataset.pluginCss = `${ID}/theme.css`;
         tag.textContent = CSS;
         document.head.appendChild(tag);
-        airBattle = createAirBattleBackground({doc: document, win: window});
         renderPreferences();
         return () => {
           disposed = true;

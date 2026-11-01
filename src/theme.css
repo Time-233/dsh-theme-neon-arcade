@@ -127,8 +127,8 @@ html[data-neon-arcade-decorations] .BynINW_sidebarCol {
   background-image: var(--na-stars), linear-gradient(180deg, #35f1ff06, transparent 24%, #a35cff09);
   background-size: 560px 420px, 100% 100%;
 }
-/* A real, bounded battle simulation replaces only the background. The canvas
-   stays below native chat content and can never receive keyboard or pointer input. */
+/* Game scenes stay below native chat content in passive mode. Explicit
+   participation elevates the canvas and enables its local pointer controls. */
 .na-air-battle {
   display: none;
   position: absolute;
@@ -158,7 +158,7 @@ html[data-neon-arcade-game] [data-conversation-region='chat']:is([data-content-p
   font-family: 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
 }
 .na-air-battle-hint { color: var(--dsw-alias-label-tertiary); font-size: 11px; line-height: 18px; pointer-events: none; }
-.na-air-battle-join {
+.na-air-battle-join, .na-pig-sling-time {
   border: 1px solid var(--dsw-alias-border-l4);
   color: var(--dsw-alias-label-primary);
   background: var(--dsw-alias-bg-layer-1);
@@ -168,7 +168,8 @@ html[data-neon-arcade-game] [data-conversation-region='chat']:is([data-content-p
   white-space: nowrap;
   font: 12px/18px 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
 }
-.na-air-battle-join:hover { border-color: var(--na-cyan); color: var(--na-cyan); }
+.na-air-battle-join:hover, .na-pig-sling-time:hover { border-color: var(--na-cyan); color: var(--na-cyan); }
+.na-air-battle-join:focus-visible, .na-pig-sling-time:focus-visible { outline: 2px solid var(--na-cyan); outline-offset: 2px; }
 .na-air-battle-join[aria-pressed='true'] { border-color: var(--na-cyan); }
 html[data-neon-arcade-game] [data-conversation-region='chat'][data-na-playing] > .na-air-battle {
   z-index: 12;
@@ -265,6 +266,15 @@ html[data-neon-arcade-scanlines] .BynINW_centerCol::after {
 .na-settings-sub { margin: 14px 0 4px; padding-top: 12px; border-top: 1px solid var(--dsw-alias-border-l2); }
 .na-setting { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 36px; font-size: 13px; }
 .na-setting label { flex: 1; }
+.na-game-select { max-width: 55%; padding: 5px 8px; color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2); border: 1px solid var(--dsw-alias-border-l4); font: inherit; }
+.na-pig-sling-controls .na-air-battle-hint { max-width: min(45vw, 300px); }
+html[data-neon-arcade-game] [data-na-playing] > .na-pig-sling-controls { color: #294d5e; }
+html[data-neon-arcade-game] [data-na-playing] > .na-pig-sling-controls .na-air-battle-hint { color: #294d5e; background: #f8faf0d9; padding: 5px 7px; }
+.na-pig-sling-time { border-radius: 0; box-shadow: 2px 2px 0 #ff66cc25; }
+.na-pig-sling-controls[data-na-night] .na-pig-sling-time { color: #b4f6ff; background: #15172d; border-color: #5a6c98; }
+html[data-neon-arcade-game] [data-na-playing] > .na-pig-sling-controls[data-na-night] .na-air-battle-hint { color: #c7d7ee; background: #15172de8; }
+html[data-neon-arcade-game] [data-na-playing] > .na-pig-sling-controls[data-na-night] .na-air-battle-join { color: #e6e2ff; background: #15172d; border-color: #80c9d8; }
+.na-pig-sling-controls[data-na-night] button:hover { color: #b4f6ff; border-color: #b4f6ff; }
 .na-toggle {
   flex-shrink: 0;
   display: inline-flex;

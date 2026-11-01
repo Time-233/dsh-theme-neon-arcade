@@ -18,7 +18,7 @@
 
 向 `awesome-dsh-plugin/awesome-dsh-plugin` 提交 PR 时，只增加对应插件的一个 YAML 文件：`data/plugins/<owner>__<repo>.yml`。不要手工修改该列表自动生成的 README，也不要修改其他插件条目。
 
-已准备对应条目 [Time-233__dsh-theme-neon-arcade.yml](Time-233__dsh-theme-neon-arcade.yml)。仓库满一天后，将此文件复制到上游的 `data/plugins/` 后提交 PR。`screenshots.json` 已在本仓库根目录声明两张预览图。
+对应条目见 [Time-233__dsh-theme-neon-arcade.yml](Time-233__dsh-theme-neon-arcade.yml)，已提交上游 [PR #11021](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/11021)。更新条目时沿用该申请。`screenshots.json` 已在本仓库根目录声明四张预览图；其中小游戏画面来自同一构建的离屏测试画布。
 
 其他发布者可参考以下模板（将 `OWNER` 和 `REPO` 替换为实际信息）：
 

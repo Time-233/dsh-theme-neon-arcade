@@ -18,6 +18,7 @@ const client = readText('src/client.js')
   .replace('__THEME_CSS__', () => JSON.stringify(css))
   .replace('__THEME_TOKENS__', () => JSON.stringify(tokens))
   .replace('__AIR_BATTLE_RUNTIME__', () => readText('src/air-battle.mjs').replace(/^export /gm, ''))
-  .replace('__PIG_SLING_RUNTIME__', () => readText('src/pig-sling.mjs').replace(/^import .*;\n/gm,'').replace(/^export /gm,''));
+  .replace('__PIG_SLING_RUNTIME__', () => readText('src/pig-sling.mjs').replace(/^import .*;\n/gm,'').replace(/^export /gm,''))
+  .replace('__FRUIT_SLICE_RUNTIME__', () => readText('src/fruit-slice.mjs').replace(/^import .*;\n/gm,'').replace(/^export /gm,''));
 fs.writeFileSync(path.join(root, 'client.js'), client);
-console.log(`Built native client: ${Buffer.byteLength(client)} bytes; ${Object.keys(tokens).length} semantic tokens; embedded font, pixel scenes, air battle and pig sling.`);
+console.log(`Built native client: ${Buffer.byteLength(client)} bytes; ${Object.keys(tokens).length} semantic tokens; embedded font, pixel scenes and three games.`);

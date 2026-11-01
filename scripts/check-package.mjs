@@ -29,7 +29,7 @@ const build = spawnSync(process.execPath, ['scripts/build.mjs'], {cwd: root, enc
 assert.equal(build.status, 0, build.stderr);
 assert.deepEqual(fs.readFileSync(clientPath), before, 'Committed client.js must match a fresh build');
 const client = before.toString('utf8');
-assert.ok(!/__THEME_CSS__|__THEME_TOKENS__|__AIR_BATTLE_RUNTIME__|__PIG_SLING_RUNTIME__|__PIXEL_FONT__|__ARCADE_[A-Z_]+__/.test(client), 'Unresolved build placeholders');
+assert.ok(!/__THEME_CSS__|__THEME_TOKENS__|__AIR_BATTLE_RUNTIME__|__PIG_SLING_RUNTIME__|__FRUIT_SLICE_RUNTIME__|__PIXEL_FONT__|__ARCADE_[A-Z_]+__/.test(client), 'Unresolved build placeholders');
 assert.ok(client.includes("runtime !== 'desktop'"), 'Desktop guard must be present');
 new vm.Script(client, {filename: 'client.js'});
 // cmd is only used for the npm shim; file operations stay in Node.
@@ -40,6 +40,9 @@ assert.equal(npm.status, 0, npm.stderr);
 const [pack] = JSON.parse(npm.stdout);
 const files = new Set(pack.files.map(file => file.path));
 for (const file of ['package.json', 'index.js', 'client.js', 'cordis.patch.yml', 'icon.svg', 'screenshots.json', 'assets/icon-180.png', 'assets/Silkscreen-Regular.ttf', 'assets/Silkscreen-OFL.txt', 'README.md', 'LICENSE', 'CHANGELOG.md', 'docs/screenshots/theme.png', 'docs/screenshots/air-battle.png', 'docs/screenshots/pig-sling.png', 'scripts/build.mjs', 'src/client.js', 'src/theme.css', 'src/pig-sling.mjs', 'tests/pig-sling.test.mjs']) {
+  assert.ok(files.has(file), `Missing from tarball: ${file}`);
+}
+for (const file of ['src/fruit-slice.mjs','tests/fruit-slice.test.mjs','docs/screenshots/fruit-slice.png']) {
   assert.ok(files.has(file), `Missing from tarball: ${file}`);
 }
 for (const file of files) {

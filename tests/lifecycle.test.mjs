@@ -59,14 +59,14 @@ test('game is opt-in, restores original scene preferences, and follows the theme
   const original={enabled:true,glow:false,grid:true,scanlines:true,decorations:true};
   const a=boot({stored:JSON.stringify(original)});
   assert.ok(!a.attrs.has('data-neon-arcade-game'));
-  a.control('像素空战背景（自动交火）').props.onClick();
+  a.control('启用小游戏背景').props.onClick();
   assert.ok(a.attrs.has('data-neon-arcade-game'));
   for(const [key,value] of Object.entries(original)) assert.equal(JSON.parse(a.saved())[key],value);
   a.control('启用霓虹像素主题').props.onClick();
   assert.equal(a.attrs.size,0);
   a.control('启用霓虹像素主题').props.onClick();
   assert.ok(a.attrs.has('data-neon-arcade-game'));
-  a.control('像素空战背景（自动交火）').props.onClick();
+  a.control('启用小游戏背景').props.onClick();
   assert.ok(!a.attrs.has('data-neon-arcade-game'));
   assert.ok(a.attrs.has('data-neon-arcade-decorations'));
   assert.ok(a.attrs.has('data-neon-arcade-grid'));
@@ -89,6 +89,26 @@ test('1.0 preferences gain independent arcade decorations without losing existin
   const b=boot({stored:a.saved()});
   assert.ok(!b.attrs.has('data-neon-arcade-decorations'));
   a.dispose();b.dispose();assert.equal(a.attrs.size,0);assert.equal(b.attrs.size,0);
+});
+test('game picker migrates old preferences, persists pig mode and rejects unknown games',()=>{
+  const a=boot({stored:JSON.stringify({enabled:true,game:true,glow:false})});
+  assert.equal(a.control('游戏选择').props.value,'air');
+  a.control('游戏选择').props.onChange({target:{value:'pigs'}});
+  assert.equal(a.control('游戏选择').props.value,'pigs');
+  assert.equal(JSON.parse(a.saved()).gameKind,'pigs');assert.equal(JSON.parse(a.saved()).game,true);
+  assert.equal(JSON.parse(a.saved()).glow,false);
+  a.control('游戏选择').props.onChange({target:{value:'unknown'}});assert.equal(JSON.parse(a.saved()).gameKind,'pigs');
+  const b=boot({stored:a.saved()});assert.equal(b.control('游戏选择').props.value,'pigs');
+  b.control('启用霓虹像素主题').props.onClick();assert.equal(b.attrs.size,0);assert.equal(b.control('游戏选择').props.disabled,true);
+  const c=boot({stored:JSON.stringify({gameKind:{invalid:true}})});assert.equal(c.control('游戏选择').props.value,'air');
+  a.dispose();b.dispose();c.dispose();
+});
+test('old preferences default to night while an explicit saved daytime choice survives reload',()=>{
+  for(const [stored,expected] of [[{gameKind:'pigs'},true],[{pigNight:'invalid'},true],[{pigNight:false,gameKind:'pigs'},false]]){
+    const a=boot({stored:JSON.stringify(stored)});a.control('霓虹辉光').props.onClick();
+    assert.equal(JSON.parse(a.saved()).pigNight,expected);const b=boot({stored:a.saved()});b.control('像素网格').props.onClick();
+    assert.equal(JSON.parse(b.saved()).pigNight,expected);a.dispose();b.dispose();
+  }
 });
 function luminance(hex){const rgb=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;}
 test('dark text contrasts meet WCAG AA for small text',()=>{

@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.5.1
+
+- Slow fruit waves to a randomized 2.6–3.8 second interval and 1–4 total objects per wave, including bombs.
+- Stop spawning and slicing immediately after a bomb hit. Explode the bomb and fruits, shake the whole interface, flash solid white exactly twice, then show YOU LOSE.
+- Add an explicit restart button that resets the round. Release pointer capture on impact and restore chat focus on exit; cancel all impact effects on hide, disable or disposal.
+- Include the previously local-only fruit slicing game in the public prebuilt package.
+
+## 1.5.0 (local preview; not published)
+
+- Add Neon Fruit Slicer with six original pixel fruits, gravity-driven random tosses, a held left-button blade and short cyan-white blade trails.
+- Make bombs distinct with a larger body, bright orange warning frame, fuse, exclamation mark and BOMB label.
+- Burst a hit bomb and every current fruit into particles at their own positions, with one brief full-window flash that fades automatically. Continue playing without a game-over screen.
+- Add the third game to the persistent picker, without a day/night control. Clean up pointer capture, flash layers and game resources on exit or disable.
+- Keep GitHub, public Releases and the market application unchanged in this local update.
+
 ## 1.4.2
 
 - Mark Windows / Harness 0.2.1-rc.1, rc.2, rc.3, rc.4 and rc.5 as compatible, based on the author's confirmation of successful testing on 2026-11-01.

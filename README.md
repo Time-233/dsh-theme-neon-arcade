@@ -1,6 +1,6 @@
 # NEON ARCADE · 霓虹像素电玩
 
-**1.4.2：更新兼容性声明，Windows 桌面端 0.2.1-rc.1～0.2.1-rc.5 均已验证成功。** 包含「愤怒的小猪」与昼夜切换，默认霓虹夜晚。从下方 Releases 下载预构建安装包，支持离线安装。
+**1.5.1：新增霓虹切水果，每波随机 1～4 个物体，切中炸弹触发晃动、两次白闪和 YOU LOSE。** 从 Releases 下载预构建安装包；保留像素空战、愤怒的小猪和原有设置。
 
 为 **DeepSeek Harness 桌面端**提供霓虹像素主题、街机背景与可参与的小游戏。已验证兼容 **Windows / Harness 0.2.1-rc.1～0.2.1-rc.5**；独立 Web 客户端不会启用此主题。
 
@@ -8,7 +8,7 @@
 
 ![桌面主题预览](docs/screenshots/theme.png)
 
-*主题预览来自桌面端；两款小游戏预览来自使用同一插件构建的离屏测试画布。*
+*主题预览来自桌面端；三款小游戏预览来自使用同一插件构建的离屏测试画布。*
 
 ## 安装
 
@@ -28,7 +28,7 @@
 | 辉光 / 网格 / 像素点缀 | 通用设置中的独立开关。像素精灵集中于画布四周，实际聊天时自动淡化。 |
 | CRT 扫描线 | 默认关闭；开启后为一条低亮度灰蓝细线，约 18 秒从上向下循环，不平铺密集横纹。 |
 | 像素空战背景 | 默认关闭；开启后我方自动巡航和双发射击，敌机持续生成并射击，子弹有碰撞判定。 |
-| 游戏选择 | 在通用设置中开启「启用小游戏背景」，通过「游戏选择」切换「像素空战」或「愤怒的小猪」。同一时间运行一个游戏。 |
+| 游戏选择 | 在通用设置中开启「启用小游戏背景」，通过「游戏选择」切换「像素空战」「愤怒的小猪」或「霓虹切水果」。同一时间运行一个游戏。 |
 | 参与游戏 | 开启空战后，点击画布右上角「参与游戏」，按住鼠标左键拖动战机。松开后停留并继续自动射击。 |
 | 退出参与 | 点击「退出参与」或按 Esc，恢复聊天焦点和自动巡航。关闭游戏立即恢复原背景。 |
 
@@ -53,6 +53,19 @@
 ![愤怒的小猪：白天场景](docs/screenshots/pig-sling-day.png)
 
 旧版游戏偏好会迁移为「像素空战」，已有主题与开关选择保留。新游戏模式保存在本机，参与状态不持久化。
+
+## 霓虹切水果
+
+选择「霓虹切水果」，点击右上角 **参与游戏**，**按住鼠标左键滑动** 进行切割。仅有霓虹像素场景，没有昼夜切换。
+
+- 六种原创像素水果和炸弹从底部随机抛出，按重力上升、下落。每波间隔约 **2.6～3.8 秒**，随机 **1～4 个物体总数（包含炸弹）**；水果切中后立即碎成对应颜色的像素粒子，并留下短暂的青白刀光。
+- 炸弹采用更大的深色弹体、亮橙色警示框、引线、感叹号和 BOMB 标记。切中后立即爆散并停止出水果，场上水果也在各自位置粉碎；整个应用界面剧烈晃动，白屏闪烁两次。
+- 爆炸流程约 1.05 秒后显示 **YOU LOSE**。点击 **再来一局** 重置本局分数并重新出水果，失败后不会自动开始下一局。
+- 鼠标悬停和单击不会切水果。Esc / 退出参与恢复聊天；取消指针、切换游戏、隐藏窗口或禁用插件会释放输入和闪屏层。关闭小游戏恢复原背景。
+
+![霓虹切水果：离屏交互预览](docs/screenshots/fruit-slice.png)
+
+![霓虹切水果：失败与重新开始](docs/screenshots/fruit-slice-loss.png)
 
 ## 兼容性与实现
 
@@ -81,7 +94,7 @@ npm run release:pack
 
 主要源文件：`src/client.js`（原生插槽与设置）、`src/theme.css`（界面样式）、`src/palette.mjs`（配色）、`src/arcade-art.mjs`（SVG 场景）、`src/air-battle.mjs`（游戏与拖动逻辑）。
 
-`src/pig-sling.mjs` 提供弹弓物理、瞄准轨迹、命中及坠落判定、粒子与原创像素昼夜场景。游戏共用参与控制和生命周期；26 项自动测试覆盖两种游戏、模式迁移和夜间精灵可辨识性，另有离屏 Chromium 的拖拽、发射、昼夜切换及偏好保存验证。
+`src/pig-sling.mjs` 提供弹弓物理与像素昼夜场景；`src/fruit-slice.mjs` 提供水果抛射、线段切割判定、炸弹爆炸、整窗晃动和双白闪，以及失败和重新开始。36 项自动测试覆盖三款游戏、偏好迁移和资源清理，另有离屏 Chromium 的实际拖拽、切割、完整失败流程及偏好保存验证。
 
 发布与收录流程见 [docs/RELEASING.md](docs/RELEASING.md)，版本变化见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -94,6 +107,8 @@ Download **`dsh-theme-neon-arcade.tgz`** from [Releases](https://github.com/Time
 Enable the air-battle background and click **参与游戏** (Join game). Hold the left mouse button and drag to move your plane; firing is automatic and respawns are unlimited. Click **退出参与** (Leave game) or press Esc to return to chat and autopilot. Turning the game off restores the original scene. The standalone Web client is untouched.
 
 Version 1.4.1 also includes **愤怒的小猪** (Angry Pigs). Select it under **游戏选择**, join, pull the loaded pig down or back, and release to launch. It offers unlimited pigs, gravity-matched dotted aiming, five flying bird silhouettes, immediate pig fragments and birds that fall before shattering at the ground. The scene defaults to neon night; use **切换白天 / 切换夜晚** to switch and save the setting without resetting gameplay.
+
+Version 1.5.1 adds **霓虹切水果** (Neon Fruit Slicer). Hold the left mouse button and swipe to slice six kinds of pixel fruit. Each wave tosses 1–4 total objects, including bombs, every 2.6–3.8 seconds. A bomb hit stops the round, shakes the whole interface and flashes full white twice before showing **YOU LOSE**; click **再来一局** to restart. This game has one neon pixel scene and no day/night switch.
 
 ## 许可 / License
 

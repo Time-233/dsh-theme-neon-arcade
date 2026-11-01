@@ -1,8 +1,8 @@
 # NEON ARCADE · 霓虹像素电玩
 
-**1.4.1：「愤怒的小猪」新增昼夜切换，默认霓虹夜晚。** 从下方 Releases 下载预构建安装包，支持离线安装。
+**1.4.2：更新兼容性声明，Windows 桌面端 0.2.1-rc.1～0.2.1-rc.5 均已验证成功。** 包含「愤怒的小猪」与昼夜切换，默认霓虹夜晚。从下方 Releases 下载预构建安装包，支持离线安装。
 
-为 **DeepSeek Harness 桌面端**提供霓虹像素主题、街机背景与可参与的小游戏。主题适配基于 **Windows / Harness 0.2.1-rc.2**；独立 Web 客户端不会启用此主题。
+为 **DeepSeek Harness 桌面端**提供霓虹像素主题、街机背景与可参与的小游戏。已验证兼容 **Windows / Harness 0.2.1-rc.1～0.2.1-rc.5**；独立 Web 客户端不会启用此主题。
 
 深紫黑底色、电光青与品红描边、原创像素精灵、星空、城市剪影和像素鲸鱼。正文、中文、代码与终端保留原有字体。支持深浅色外观，所有装饰均可关闭。
 
@@ -56,7 +56,7 @@
 
 ## 兼容性与实现
 
-- 已验证：Windows 桌面端 **0.2.1-rc.2**。尚未验证其他系统和其他 Harness 版本。
+- 已验证：Windows 桌面端 **0.2.1-rc.1、0.2.1-rc.2、0.2.1-rc.3、0.2.1-rc.4、0.2.1-rc.5**。扩展范围依据作者于 2026-11-01 确认的实际验证结果，已同步至 `package.json` 的兼容性声明。尚未验证其他系统和范围外的 Harness 版本。
 - 使用原生 `dsh.bundle` / Cordis 声明、`theme.overrideTokens()` 与界面插槽；不修改应用安装文件。
 - `dsh.client.platform: web` 是桌面内嵌渲染器使用的清单格式。运行时检查 `shortcuts.runtime === 'desktop'`，独立 Web 客户端直接退出。
 - 基础配色提供 105 个深浅色语义参数。局部框架装饰适配了当前 Harness 的样式类名；应用更新若改变这些类名，部分装饰可能需要适配。
@@ -87,7 +87,7 @@ npm run release:pack
 
 ## English
 
-NEON ARCADE is a neon pixel theme for **DeepSeek Harness desktop**, tested on Windows with Harness **0.2.1-rc.2**. It offers dark/light palettes, original pixel scenery, optional glow/grid, a subtle single CRT scan line, and an optional air-battle background.
+NEON ARCADE is a neon pixel theme for **DeepSeek Harness desktop**, verified on Windows with Harness **0.2.1-rc.1 through 0.2.1-rc.5**. The expanded range is based on the author's confirmation of successful testing on 2026-11-01 and is declared in `package.json`. It offers dark/light palettes, original pixel scenery, optional glow/grid, a subtle single CRT scan line, and an optional air-battle background.
 
 Download **`dsh-theme-neon-arcade.tgz`** from [Releases](https://github.com/Time-233/dsh-theme-neon-arcade/releases/latest). In the desktop app, open **Plugins → Add plugin**, enter the downloaded file's absolute path, then install and enable it. The package is prebuilt and has no external runtime dependencies. Configure it under **Settings → General → NEON ARCADE**.
 

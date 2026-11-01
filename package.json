@@ -1,6 +1,6 @@
 {
   "name": "dsh-theme-neon-arcade",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Neon pixel desktop theme with optional air battle and Angry Pigs sling games, including drag controls, gravity and pixel particles.",
   "type": "module",
   "license": "MIT",
@@ -40,7 +40,13 @@
       ]
     },
     "compatibility": {
-      "dshReleases": { "0.2.1-rc.2": "compatible" }
+      "dshReleases": {
+        "0.2.1-rc.1": "compatible",
+        "0.2.1-rc.2": "compatible",
+        "0.2.1-rc.3": "compatible",
+        "0.2.1-rc.4": "compatible",
+        "0.2.1-rc.5": "compatible"
+      }
     }
   }
 }

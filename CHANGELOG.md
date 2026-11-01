@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.2
+
+- Mark Windows / Harness 0.2.1-rc.1, rc.2, rc.3, rc.4 and rc.5 as compatible, based on the author's confirmation of successful testing on 2026-11-01.
+- Align the manifest, Chinese and English installation documentation, and release notes with the verified range. Theme and game runtime remain unchanged from 1.4.1.
+
 ## 1.4.1
 
 - Default Angry Pigs to a neon pixel night scene with a moon, sparse stars, blue-purple hills and luminous grass edges.

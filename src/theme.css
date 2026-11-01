@@ -180,6 +180,43 @@ html[data-neon-arcade-game] [data-conversation-region='chat'][data-na-playing] >
   outline: none;
 }
 html[data-neon-arcade-game] [data-conversation-region='chat'][data-na-playing] > .na-air-battle:focus-visible { outline: none; }
+.na-fruit-bomb-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  background: #fff;
+}
+html[data-na-fruit-impact] body > :not(.na-fruit-bomb-flash) {
+  animation: na-fruit-impact .85s steps(1, end) both;
+}
+@keyframes na-fruit-impact {
+  0%, 100% { transform: translate(0, 0); }
+  6% { transform: translate(-24px, 14px) rotate(-.5deg); }
+  14% { transform: translate(22px, -18px) rotate(.6deg); }
+  22% { transform: translate(-20px, -12px) rotate(-.4deg); }
+  30% { transform: translate(26px, 16px) rotate(.5deg); }
+  40% { transform: translate(-18px, 15px) rotate(-.5deg); }
+  50% { transform: translate(20px, -14px) rotate(.4deg); }
+  62% { transform: translate(-14px, -10px) rotate(-.3deg); }
+  74% { transform: translate(12px, 9px) rotate(.2deg); }
+  84% { transform: translate(-8px, 5px); }
+  92% { transform: translate(5px, -4px); }
+}
+.na-fruit-result {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 14;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  width: 350px; max-width: calc(100% - 48px); padding: 28px 20px;
+  background: #12132cf2; border: 2px solid #ff658a; box-shadow: 5px 5px 0 #59cbe855, 0 0 32px #ff658a20;
+  color: #e8e4ff; font-family: 'Segoe UI', 'Microsoft YaHei UI', sans-serif; text-align: center;
+}
+.na-fruit-result[hidden] { display: none; }
+.na-fruit-result h2 { font: 32px/1.2 'Neon Arcade Pixel', monospace; color: #ff8fb4; margin: 0; white-space: nowrap; }
+.na-fruit-result p { font-size: 13px; margin: 0; color: #b8c9df; }
+.na-fruit-restart { background: #b9faff; color: #12132c; padding: 8px 22px; border: 1px solid #e8ffff; border-radius: 0; font: 14px/20px 'Microsoft YaHei UI', sans-serif; cursor: pointer; }
+.na-fruit-restart:hover { background: #ffd08a; }
+.na-fruit-restart:focus-visible { outline: 2px solid #ff8fb4; outline-offset: 4px; }
+.na-fruit-slice-controls .na-air-battle-hint { color: #b8c9df; background: #12132ce8; padding: 5px 7px; }
 html[data-neon-arcade] [data-composer-card] {
   border: 1px solid var(--na-edge);
   border-radius: 7px;

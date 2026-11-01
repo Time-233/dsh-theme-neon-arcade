@@ -9,6 +9,7 @@ window.__ModuleLoader__.load({
     const TOKENS = __THEME_TOKENS__;
     __AIR_BATTLE_RUNTIME__
     __PIG_SLING_RUNTIME__
+    __FRUIT_SLICE_RUNTIME__
     const ID = 'dsh-theme-neon-arcade';
     const KEY = `${ID}:v1`;
     const ATTRS = ['data-neon-arcade', 'data-neon-arcade-glow', 'data-neon-arcade-grid', 'data-neon-arcade-scanlines', 'data-neon-arcade-decorations', 'data-neon-arcade-game'];
@@ -19,7 +20,7 @@ window.__ModuleLoader__.load({
       try {
         const value = JSON.parse(localStorage.getItem(KEY));
         return Object.fromEntries(Object.entries(DEFAULTS).map(([k,v]) => [k, k==='gameKind'
-          ? (['air','pigs'].includes(value?.[k])?value[k]:v) : (typeof value?.[k] === 'boolean' ? value[k] : v)]));
+          ? (['air','pigs','fruit'].includes(value?.[k])?value[k]:v) : (typeof value?.[k] === 'boolean' ? value[k] : v)]));
       } catch { return {...DEFAULTS}; }
     }
 
@@ -59,7 +60,8 @@ window.__ModuleLoader__.load({
           airBattle?.dispose();
           runtimeKind=preferences.gameKind;
           airBattle=runtimeKind==='pigs'?createPigSlingBackground({doc:document,win:window,night:preferences.pigNight,
-            onNightChange:night=>update({pigNight:night})}):createAirBattleBackground({doc:document,win:window});
+            onNightChange:night=>update({pigNight:night})}):runtimeKind==='fruit'
+              ?createFruitSliceBackground({doc:document,win:window}):createAirBattleBackground({doc:document,win:window});
         }
         if (runtimeKind==='pigs') airBattle?.setNight(preferences.pigNight);
         airBattle?.setEnabled(preferences.enabled && preferences.game);
@@ -88,15 +90,17 @@ window.__ModuleLoader__.load({
             h('div',{className:'na-setting',key:'gameKind'},
               h('label',{htmlFor:'na-game-kind'},'游戏选择'),
               h('select',{id:'na-game-kind',className:'na-game-select','aria-label':'游戏选择',value:prefs.gameKind,disabled:!prefs.enabled,
-                onChange:event=>{if(['air','pigs'].includes(event.target.value))update({gameKind:event.target.value});}},
-                h('option',{value:'air'},'像素空战'),h('option',{value:'pigs'},'愤怒的小猪'))),
+                onChange:event=>{if(['air','pigs','fruit'].includes(event.target.value))update({gameKind:event.target.value});}},
+                h('option',{value:'air'},'像素空战'),h('option',{value:'pigs'},'愤怒的小猪'),h('option',{value:'fruit'},'霓虹切水果'))),
             toggle('glow', '霓虹辉光', !prefs.enabled, prefs),
             toggle('grid', '像素网格', !prefs.enabled, prefs),
             toggle('scanlines', 'CRT 扫描线', !prefs.enabled, prefs),
             toggle('decorations', '像素街机点缀', !prefs.enabled, prefs)),
           h('div', {className: 'na-setting-note'}, prefs.gameKind==='pigs'
             ? '默认霓虹夜晚，画布右上角可切换白天 / 夜晚并记住选择。点击「参与游戏」，拖住底部小猪拉弓，松开发射；小猪无限供应。点击「退出参与」或按 Esc 恢复聊天。'
-            : '点击「参与游戏」，按住鼠标拖动战机，自动射击、中弹无限复活。点击「退出参与」或按 Esc 恢复聊天。'));
+            : prefs.gameKind==='fruit'
+              ? '每隔约 2.6～3.8 秒随机抛出 1～4 个物体。点击「参与游戏」并按住左键滑切；切中炸弹会爆炸、剧烈晃动、白闪两下，再显示 YOU LOSE，可再来一局。Esc 退出。'
+              : '点击「参与游戏」，按住鼠标拖动战机，自动射击、中弹无限复活。点击「退出参与」或按 Esc 恢复聊天。'));
       }
       function Footer({wide}) {
         const prefs = usePreferences();

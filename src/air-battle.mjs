@@ -243,7 +243,8 @@ export function paintAirBattle(ctx, battle, dark = true) {
 /** Own all DOM/animation resources; disabled mode has no observers or timers. */
 export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paintAirBattle, mode='air',
   passiveHint='自动巡航', playingHint='按住拖动战机 · Esc 退出',
-  ariaLabel='像素空战操作区，按住鼠标拖动战机，按 Esc 退出参与', configureScene}) {
+  ariaLabel='像素空战操作区，按住鼠标拖动战机，按 Esc 退出参与', configureScene,
+  idleCursor='grab',activeCursor='grabbing'}) {
   const selector = '[data-conversation-region="chat"]';
   const scenes = new Map();
   let enabled = false, disposed = false, observer, resizeObserver, frameId = null, lastFrame = null;
@@ -264,7 +265,7 @@ export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paint
       scene.battle.endDrag?.(release);
       try { if (scene.canvas.hasPointerCapture?.(pointerId)) scene.canvas.releasePointerCapture(pointerId); } catch {}
     }
-    scene.canvas.style.cursor = scene.playing ? 'grab' : '';
+    scene.canvas.style.cursor = scene.playing ? idleCursor : '';
   }
   function setParticipation(scene, value, restoreFocus = true) {
     const playing = Boolean(value);
@@ -283,7 +284,7 @@ export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paint
     scene.canvas.setAttribute('aria-hidden', String(!playing));
     scene.canvas.tabIndex = playing ? 0 : -1;
     if (playing) {
-      scene.canvas.style.cursor = 'grab';
+      scene.canvas.style.cursor = idleCursor;
       scene.canvas.focus({preventScroll: true});
     } else {
       endDrag(scene);
@@ -320,7 +321,7 @@ export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paint
       scene.pointerId = event.pointerId;
       scene.canvas.focus({preventScroll: true});
       try { scene.canvas.setPointerCapture(event.pointerId); } catch {}
-      scene.canvas.style.cursor = 'grabbing';
+      scene.canvas.style.cursor = activeCursor;
       move(event);
     });
     listen(scene.canvas, 'pointermove', event => {
@@ -334,12 +335,12 @@ export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paint
       endDrag(scene,name==='pointerup');
     });
     listen(scene.canvas, 'blur', event => {
-      if (scene.playing && !scene.controls.contains(event.relatedTarget)) setParticipation(scene, false, false);
+      if (scene.playing && !scene.controls.contains(event.relatedTarget) && !scene.additionalControls?.contains(event.relatedTarget)) setParticipation(scene, false, false);
     });
     configureScene?.(scene, listen, escape);
   }
   function destroyScene(scene) {
-    const ownsFocus=doc.activeElement===scene.canvas || scene.controls.contains(doc.activeElement);
+    const ownsFocus=doc.activeElement===scene.canvas || scene.controls.contains(doc.activeElement) || Boolean(scene.additionalControls?.contains(doc.activeElement));
     setParticipation(scene, false, ownsFocus); endDrag(scene);
     for (const cleanup of scene.cleanups) cleanup();
     scene.host.removeAttribute('data-na-playing');
@@ -348,7 +349,7 @@ export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paint
   function resizeScene(scene) {
     const rect = scene.host.getBoundingClientRect();
     scene.width = rect.width; scene.height = rect.height;
-    scene.hint.style.display = mode==='pigs' && rect.width<620 ? 'none' : '';
+    scene.hint.style.display = mode!=='air' && rect.width<620 ? 'none' : '';
     if (rect.width <= 0 || rect.height <= 0) return;
     const ratio = Math.min(1, 1440 / rect.width, 1080 / rect.height);
     const width = Math.max(1, Math.round(rect.width * ratio)), height = Math.max(1, Math.round(rect.height * ratio));
@@ -367,20 +368,21 @@ export function createAirBattleBackground({doc, win, Game=AirBattle, paint=paint
     for (const host of current) {
       if (scenes.has(host)) continue;
       const canvas = doc.createElement('canvas');
-      canvas.className = 'na-air-battle'+(mode==='pigs'?' na-pig-sling':'');
+      canvas.className = 'na-air-battle'+(mode==='pigs'?' na-pig-sling':mode==='fruit'?' na-fruit-slice':'');
       canvas.setAttribute('data-na-game',mode);
       canvas.setAttribute('aria-hidden', 'true');
       canvas.setAttribute('aria-label', ariaLabel);
       canvas.tabIndex = -1;
       const ctx = canvas.getContext('2d', {alpha: false});
       if (!ctx) continue;
-      const controls = doc.createElement('div'); controls.className = 'na-air-battle-controls'+(mode==='pigs'?' na-pig-sling-controls':'');
+      const controls = doc.createElement('div'); controls.className = 'na-air-battle-controls'+(mode==='pigs'?' na-pig-sling-controls':mode==='fruit'?' na-fruit-slice-controls':'');
       const hint = doc.createElement('span'); hint.className = 'na-air-battle-hint'; hint.textContent = passiveHint;
       const button = doc.createElement('button'); button.className = 'na-air-battle-join';
       button.type = 'button'; button.textContent = '参与游戏'; button.setAttribute('aria-pressed', 'false');
       controls.appendChild(hint); controls.appendChild(button);
       const scene = {host, canvas, ctx, controls, hint, button, playing: false, pointerId: null, previousFocus: null,
         cleanups: [], battle: new Game({seed: 82171 + serial++ * 997}), width: 0, height: 0};
+      scene.cancelDrag=()=>endDrag(scene);
       scenes.set(host, scene); host.appendChild(canvas); host.appendChild(controls);
       bindControls(scene); resizeScene(scene);
       resizeObserver?.observe(host);

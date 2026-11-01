@@ -14,7 +14,8 @@ export function fakeDom(){
     remove(){this.isConnected=false;const i=this.parent?.children.indexOf(this);if(i>=0)this.parent.children.splice(i,1);}
   });
   const host=element('div');
-  const doc={hidden:false,body:{hasAttribute:()=>true},querySelectorAll:()=>[host],
+  const body=element('body');body.hasAttribute=()=>true;
+  const doc={hidden:false,body,documentElement:element('html'),querySelectorAll:()=>[host],
     addEventListener:(k,fn)=>documentEvents.set(k,fn),removeEventListener:k=>documentEvents.delete(k),
     createElement(tag){const node=element(tag);if(tag==='canvas'){
       node.width=0;node.height=0;

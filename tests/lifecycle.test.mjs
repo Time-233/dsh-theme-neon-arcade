@@ -110,6 +110,14 @@ test('old preferences default to night while an explicit saved daytime choice su
     assert.equal(JSON.parse(b.saved()).pigNight,expected);a.dispose();b.dispose();
   }
 });
+test('fruit game choice persists independently of pig daytime preference',()=>{
+  const a=boot({stored:JSON.stringify({gameKind:'pigs',pigNight:false,game:true})});
+  a.control('游戏选择').props.onChange({target:{value:'fruit'}});
+  assert.equal(a.control('游戏选择').props.value,'fruit');assert.equal(JSON.parse(a.saved()).pigNight,false);
+  const b=boot({stored:a.saved()});assert.equal(b.control('游戏选择').props.value,'fruit');
+  assert.equal(b.control('游戏选择').children.filter(o=>o.props.value==='fruit').length,1);
+  a.dispose();b.dispose();
+});
 function luminance(hex){const rgb=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;}
 test('dark text contrasts meet WCAG AA for small text',()=>{
   const bg=luminance(dark['--dsw-alias-bg-base']);
